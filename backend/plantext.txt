@@ -1,0 +1,124 @@
+backend/
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+├── tsconfig.json
+├── .env
+├── README.md
+│
+├── src/
+│   ├── main.ts
+│   ├── app.module.ts
+│
+│   ├── auth/
+│   │   ├── auth.controller.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   ├── jwt.strategy.ts
+│   │   ├── jwt-auth.guard.ts
+│   │   └── dto/
+│   │       ├── login.dto.ts
+│   │       └── register.dto.ts
+│
+│   ├── users/
+│   │   ├── users.controller.ts
+│   │   ├── users.module.ts
+│   │   ├── users.service.ts
+│   │   ├── user.entity.ts
+│   │   └── dto/
+│   │       ├── create-user.dto.ts
+│   │       └── update-user.dto.ts
+│
+│   ├── products/
+│   │   ├── products.controller.ts
+│   │   ├── products.module.ts
+│   │   ├── products.service.ts
+│   │   ├── product.entity.ts
+│   │   ├── import-aliexpress.service.ts
+│   │   ├── import-amazon.service.ts
+│   │   ├── import-walmart.service.ts
+│   │   └── dto/
+│   │       ├── create-product.dto.ts
+│   │       └── update-product.dto.ts
+│
+│   ├── suppliers/
+│   │   ├── suppliers.module.ts
+│   │   ├── aliexpress.service.ts
+│   │   ├── amazon.service.ts
+│   │   ├── walmart.service.ts
+│   │   └── ...
+│
+│   ├── marketplaces/
+│   │   ├── marketplaces.module.ts
+│   │   ├── shopify.service.ts
+│   │   ├── ebay.service.ts
+│   │   ├── woocommerce.service.ts
+│   │   └── ...
+│
+│   ├── orders/
+│   │   ├── orders.controller.ts
+│   │   ├── orders.module.ts
+│   │   ├── orders.service.ts
+│   │   ├── order.entity.ts
+│   │   ├── order-item.entity.ts
+│   │   └── dto/
+│   │       ├── create-order.dto.ts
+│   │       ├── update-order.dto.ts
+│   │       └── order-item.dto.ts
+│
+│   ├── monitoring/
+│   │   ├── monitoring.module.ts
+│   │   ├── price-monitor.service.ts
+│   │   ├── stock-monitor.service.ts
+│   │   └── rules/
+│   │       └── pricing-rules.service.ts
+│
+│   ├── analytics/
+│   │   ├── analytics.module.ts
+│   │   ├── dashboard.controller.ts
+│   │   ├── dashboard.service.ts
+│   │   └── reports.service.ts
+│
+│   ├── notifications/
+│   │   ├── notifications.module.ts
+│   │   ├── notifications.service.ts
+│   │   ├── email.service.ts
+│   │   ├── sms.service.ts
+│   │   └── webhook.service.ts
+│
+│   ├── billing/
+│   │   ├── billing.module.ts
+│   │   ├── stripe.service.ts
+│   │   ├── paypal.service.ts
+│   │   ├── subscription.service.ts
+│   │   └── plan.entity.ts
+│
+│   ├── roles/
+│   │   ├── roles.module.ts
+│   │   ├── roles.guard.ts
+│   │   └── role.entity.ts
+│
+│   ├── support/
+│   │   ├── support.module.ts
+│   │   ├── ticket.controller.ts
+│   │   ├── ticket.service.ts
+│   │   ├── ticket.entity.ts
+│   │   └── faq.service.ts
+│
+│   ├── common/
+│   │   ├── pipes/
+│   │   ├── guards/
+│   │   ├── interceptors/
+│   │   ├── exceptions/
+│   │   └── utils/
+│
+│   └── tasks/
+│       ├── tasks.module.ts
+│       ├── cron.service.ts
+│       └── queue.service.ts
+│
+├── test/
+│   ├── auth.e2e-spec.ts
+│   ├── users.e2e-spec.ts
+│   ├── products.e2e-spec.ts
+│   └── ...

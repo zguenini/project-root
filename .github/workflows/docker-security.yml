@@ -1,0 +1,30 @@
+name: Docker Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 5 * * 1'  # Scan auto chaque lundi à 5h
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - backend
+          - frontend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build ${{ matrix.image }} Docker image
+        run: |
+          docker build -t mysaas-${{ matrix.image }} ./${{ matrix.image }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.13.1
+        with:
+          image-ref: mysaas-${{ matrix.image }}
+          format: 'table'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'

@@ -1,0 +1,32 @@
+name: Snyk IaC Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 4 * * 1'
+
+jobs:
+  snyk-iac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@v2
+
+      - name: Snyk Terraform Scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk iac test ./infrastructure/terraform --severity-threshold=high
+
+      # Pulumi scan si tu utilises Pulumi :
+      - name: Install Pulumi CLI
+        run: curl -fsSL https://get.pulumi.com | sh
+      - name: Snyk Pulumi Scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          PATH: $PATH:/root/.pulumi/bin
+        run: snyk iac test ./infrastructure/pulumi --severity-threshold=high
