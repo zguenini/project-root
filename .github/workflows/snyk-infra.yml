@@ -15,16 +15,16 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Snyk CLI
-        uses: snyk/actions/setup@v2
+        uses: snyk/actions/setup@v1
 
       - name: Snyk Terraform Scan
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk iac test ./infrastructure/terraform --severity-threshold=high
 
-      # Pulumi scan si tu utilises Pulumi :
       - name: Install Pulumi CLI
         run: curl -fsSL https://get.pulumi.com | sh
+
       - name: Snyk Pulumi Scan
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
