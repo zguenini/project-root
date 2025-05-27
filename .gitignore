@@ -36,3 +36,5 @@ coverage/
 *.pid
 *.seed
 *.tgz
+
+/infrastructure/pgdata/
