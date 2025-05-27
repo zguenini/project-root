@@ -1,30 +1,47 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
-import { OrdersModule } from './orders/orders.module'; // <-- À ajouter
+import { OrdersModule } from './orders/orders.module';
+
 import { User } from './users/user.entity';
 import { Product } from './products/product.entity';
-import { Order } from './orders/order.entity';         // <-- À ajouter
-import { OrderItem } from './orders/order-item.entity'; // <-- À ajouter
+import { Order } from './orders/order.entity';
+import { OrderItem } from './orders/order-item.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT ?? '5432', 10),
-      username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'password',
-      database: process.env.DATABASE_NAME || 'dropshipping',
-      entities: [User, Product, Order, OrderItem], // <-- Ajoute ici
-      synchronize: true,
+    ConfigModule.forRoot({ isGlobal: true }), // charge automatiquement .env
+
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        const { DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME } = process.env;
+
+        if (!DB_HOST || !DB_PORT || !DB_USER || !DB_PASS || !DB_NAME) {
+          throw new Error('❌ One or more required DB env variables are missing.');
+        }
+
+        return {
+          type: 'postgres',
+          host: DB_HOST,
+          port: parseInt(DB_PORT, 10),
+          username: DB_USER,
+          password: DB_PASS,
+          database: DB_NAME,
+          entities: [User, Product, Order, OrderItem],
+          synchronize: true,
+        };
+      },
     }),
-    UsersModule,
+
+    TypeOrmModule.forFeature([User, Product, Order, OrderItem]),
     AuthModule,
+    UsersModule,
     ProductsModule,
-    OrdersModule, // <-- Ajoute ici
+    OrdersModule,
   ],
 })
 export class AppModule {}

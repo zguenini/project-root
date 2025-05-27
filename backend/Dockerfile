@@ -1,8 +1,8 @@
-# 1. Etape de build (utilise l'image officielle Node)
+# --- Étape 1 : Build ---
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copie uniquement les fichiers nécessaires pour installer les dépendances (cache optimisé)
+# Installation des dépendances avec cache optimisé
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
   if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
@@ -11,29 +11,22 @@ RUN \
   else npm install; \
   fi
 
-# Copie le reste du code et build l'app
+# Copie du code et build
 COPY . .
-# Optionnel : Si tu utilises Prisma, exécute les migrations ici
-# RUN npx prisma generate && npx prisma migrate deploy
+# RUN npx prisma generate && npx prisma migrate deploy  # si Prisma utilisé
 RUN npm run build
 
-# 2. Etape de prod : runner minimal, sécurisé
+# --- Étape 2 : Production ---
 FROM node:18-alpine AS production
 WORKDIR /app
-
 ENV NODE_ENV=production
 
-# Copie uniquement le build et les dépendances prod
+# Copie du build
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/.env ./
-# Facultatif, si tu utilises Prisma
-#COPY --from=builder /app/prisma ./prisma   
 
-# Ne jamais exposer les fichiers sensibles (src, tests, docs...)
-
-# Liveness/Readiness probes, PORT variable support
+# Liveness/Readiness
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --retries=5 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1

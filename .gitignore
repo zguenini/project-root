@@ -1,4 +1,38 @@
+# Node
 node_modules/
 dist/
-.env
+.cache/
 *.log
+npm-debug.log*
+
+# Environnements
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+**/pgdata/
+docker-compose.override.yml
+
+# Build frontend
+/frontend/build/
+/frontend/.next/
+/frontend/out/
+
+# Coverage/test
+coverage/
+*.lcov
+
+# Misc
+*.pid
+*.seed
+*.tgz
