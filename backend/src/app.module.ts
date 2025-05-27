@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -14,26 +14,34 @@ import { OrderItem } from './orders/order-item.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // charge automatiquement .env
+    ConfigModule.forRoot({ isGlobal: true }),
 
     TypeOrmModule.forRootAsync({
-      useFactory: () => {
-        const { DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME } = process.env;
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService): Promise<TypeOrmModuleOptions> => {
+        const host = config.get<string>('DB_HOST') ?? 'localhost';
+        const port = parseInt(config.get<string>('DB_PORT') ?? '5432', 10);
+        const username = config.get<string>('DB_USER') ?? 'myuser';
+        const password = config.get<string>('DB_PASS') ?? 'mypass';
+        const database = config.get<string>('DB_NAME') ?? 'myappdb';
 
-        if (!DB_HOST || !DB_PORT || !DB_USER || !DB_PASS || !DB_NAME) {
-          throw new Error('❌ One or more required DB env variables are missing.');
-        }
-
-        return {
+        const dbConfig: TypeOrmModuleOptions = {
           type: 'postgres',
-          host: DB_HOST,
-          port: parseInt(DB_PORT, 10),
-          username: DB_USER,
-          password: DB_PASS,
-          database: DB_NAME,
+          host,
+          port,
+          username,
+          password,
+          database,
           entities: [User, Product, Order, OrderItem],
           synchronize: true,
         };
+
+        console.log('\n========== DB CONFIG ==========');
+        console.log(dbConfig);
+        console.log('================================\n');
+
+        return dbConfig;
       },
     }),
 

@@ -24,14 +24,15 @@
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
+    "class-validator": "^0.14.2",
     "dotenv": "^16.5.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.0.0",
-    "typeorm": "^0.3.9"
+    "save": "^2.9.0",
+    "typeorm": "^0.3.24"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.5.0",
