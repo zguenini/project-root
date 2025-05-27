@@ -13,8 +13,8 @@ export class UsersService {
   ) {}
 
   findAll(): Promise<User[]> {
-    return this.userRepository.find();
-  }
+  return this.userRepository.find();
+}
 
   findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOneBy({ email });
