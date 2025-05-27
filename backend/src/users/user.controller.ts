@@ -21,6 +21,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get()
+  findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
+
   @Get(':email')
   findByEmail(@Param('email') email: string): Promise<User | null> {
     return this.usersService.findByEmail(email);
