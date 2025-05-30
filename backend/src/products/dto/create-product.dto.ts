@@ -1,4 +1,15 @@
-import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
+// src/products/dto/create-product.dto.ts
+
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsUrl,
+  IsEnum,
+  IsBoolean,
+  Min,
+} from 'class-validator';
+import { ProductSource } from '../enums/product-source.enum';
 
 export class CreateProductDto {
   @IsString()
@@ -8,15 +19,21 @@ export class CreateProductDto {
   @IsString()
   description?: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price!: number;
 
   @IsOptional()
-  @IsString()
+  @IsUrl()
   imageUrl?: string;
 
   @IsOptional()
   @IsString()
   aliexpressId?: string;
+
+  @IsEnum(ProductSource, { message: 'source must be a valid ProductSource' })
+  source!: ProductSource;
+
+  @IsBoolean()
+  isActive!: boolean;
 }

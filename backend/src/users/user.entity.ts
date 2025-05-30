@@ -1,17 +1,34 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { Exclude, Expose } from 'class-transformer';
+// src/users/user.entity.ts
+
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  @Expose()
   id!: number;
 
-  @Column({ unique: true })
-  @Expose()
+  @Index({ unique: true })
+  @Column()
   email!: string;
 
-  @Column()
   @Exclude()
+  @Column()
   password!: string;
+
+  @Column({ default: true })
+  isActive: boolean = true;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

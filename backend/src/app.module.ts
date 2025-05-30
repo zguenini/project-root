@@ -1,3 +1,5 @@
+// src/app.module.ts
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
@@ -14,27 +16,27 @@ import { OrderItem } from './orders/order-item.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService): Promise<TypeOrmModuleOptions> => {
-        const host = config.get<string>('DB_HOST') ?? 'localhost';
-        const port = parseInt(config.get<string>('DB_PORT') ?? '5432', 10);
-        const username = config.get<string>('DB_USER') ?? 'myuser';
-        const password = config.get<string>('DB_PASS') ?? 'mypass';
-        const database = config.get<string>('DB_NAME') ?? 'myappdb';
-
         const dbConfig: TypeOrmModuleOptions = {
           type: 'postgres',
-          host,
-          port,
-          username,
-          password,
-          database,
+          host: config.get<string>('DB_HOST'),
+          port: parseInt(config.get<string>('DB_PORT') ?? '5432', 10),
+          username: config.get<string>('DB_USER'),
+          password: config.get<string>('DB_PASS'),
+          database: config.get<string>('DB_NAME'),
           entities: [User, Product, Order, OrderItem],
           synchronize: true,
+          autoLoadEntities: true,
+          retryAttempts: 5,
+          retryDelay: 3000,
         };
 
         console.log('\n========== DB CONFIG ==========');

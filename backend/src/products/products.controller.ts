@@ -2,59 +2,58 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
+  Put,
+  Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Product } from './product.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ImportProductDto } from './dto/import-product.dto';
 
-@UseGuards(JwtAuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(): Promise<Product[]> {
-    return this.productsService.findAll();
+  findAll(@Query('page') page = 1, @Query('limit') limit = 20) {
+    return this.productsService.paginate(Number(page), Number(limit));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Product | null> {
-    return this.productsService.findOne(Number(id));
+  findOne(@Param('id') id: string) {
+    return this.productsService.findOne(+id);
   }
 
   @Post()
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  create(@Body() data: CreateProductDto): Promise<Product> {
-    return this.productsService.create(data);
+  create(@Body() dto: CreateProductDto) {
+    return this.productsService.create(dto);
   }
 
   @Put(':id')
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  update(
-    @Param('id') id: string,
-    @Body() data: UpdateProductDto,
-  ): Promise<Product | null> {
-    return this.productsService.update(Number(id), data);
+  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+    return this.productsService.update(+id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.productsService.remove(Number(id));
+  remove(@Param('id') id: string) {
+    return this.productsService.remove(+id);
   }
 
-  // Import/sync AliExpress (facultatif, tu peux protéger aussi)
-  @Post('import-aliexpress')
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  importAliExpress(@Body() body: { url: string }): Promise<Product> {
-    return this.productsService.importFromAliExpress(body.url);
+  @Post('import')
+  import(@Body() dto: ImportProductDto) {
+    return this.productsService.importFromSupplier(dto);
+  }
+
+  @Post(':id/sync')
+  syncOne(@Param('id') id: string) {
+    return this.productsService.syncOne(+id);
+  }
+
+  @Post('sync')
+  syncAll() {
+    return this.productsService.syncAll();
   }
 }

@@ -1,80 +1,79 @@
 import {
-  Controller, Get, Post, Put, Delete, Param, Body,
-  UseGuards, UsePipes, ValidationPipe, Request, ForbiddenException
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
+  UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { Order } from './order.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-
-// Type pour l'utilisateur dans le JWT (à adapter si besoin)
-interface JwtUserPayload {
-  id: number;
-  email: string;
-}
+import { Order, OrderStatus } from './order.entity';
+import { OrderItem } from './order-item.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from '../users/user.entity';
+import { Product } from '../products/product.entity';
 
 @UseGuards(JwtAuthGuard)
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  // Voir SES propres commandes
   @Get()
-  async findAll(@Request() req: { user: JwtUserPayload }): Promise<Order[]> {
-    return this.ordersService.findByUserId(req.user.id);
+  async findAll(): Promise<Order[]> {
+    return this.ordersService.findAll();
   }
 
-  // Voir le détail d’une commande (si elle appartient au user)
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @Request() req: { user: JwtUserPayload }
-  ): Promise<Order | null> {
-    const order = await this.ordersService.findOne(Number(id));
-    if (!order || order.user.id !== req.user.id) throw new ForbiddenException();
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Order> {
+    const order = await this.ordersService.findOne(id);
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
     return order;
   }
 
-  // Créer une commande
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  async create(
-    @Body() data: CreateOrderDto,
-    @Request() req: { user: JwtUserPayload }
-  ): Promise<Order> {
-    return this.ordersService.create({
-      user: { id: req.user.id } as any,
-      items: data.items.map(item => ({
-        product: { id: item.productId } as any,
-        quantity: item.quantity,
-        price: item.price,
-      })) as any,
-      status: 'pending',
+  async create(@Body() dto: CreateOrderDto): Promise<Order> {
+    const order = new Order();
+    order.user = { id: dto.userId } as User;
+    order.items = dto.items.map((item) => {
+      const orderItem = new OrderItem();
+      orderItem.product = { id: item.productId } as Product;
+      orderItem.quantity = item.quantity;
+      orderItem.price = item.price;
+      orderItem.order = order;
+      return orderItem;
     });
+    return this.ordersService.create(order);
   }
 
-  // Modifier une commande
   @Put(':id')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async update(
-    @Param('id') id: string,
-    @Body() data: UpdateOrderDto,
-    @Request() req: { user: JwtUserPayload }
-  ): Promise<Order | null> {
-    const order = await this.ordersService.findOne(Number(id));
-    if (!order || order.user.id !== req.user.id) throw new ForbiddenException();
-    return this.ordersService.update(Number(id), data);
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateOrderDto,
+  ): Promise<Order> {
+    const updatedOrder = await this.ordersService.update(id, {
+      ...dto,
+      status: dto.status as OrderStatus | undefined, // Ensure compatibility with OrderStatus type
+    });
+    if (!updatedOrder) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+    return updatedOrder;
   }
 
-  // Supprimer une commande
   @Delete(':id')
-  async remove(
-    @Param('id') id: string,
-    @Request() req: { user: JwtUserPayload }
-  ): Promise<void> {
-    const order = await this.ordersService.findOne(Number(id));
-    if (!order || order.user.id !== req.user.id) throw new ForbiddenException();
-    return this.ordersService.remove(Number(id));
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.ordersService.remove(id);
   }
 }
